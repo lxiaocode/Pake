@@ -26,8 +26,7 @@ use wry::application::window::Icon;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use wry::webview::WebContext;
 
-use native_dialog::FileDialog;
-use dirs::download_dir;
+use rfd::FileDialog;
 use std::path::PathBuf;
 
 enum UserEvent {
@@ -149,18 +148,15 @@ fn main() -> wry::Result<()> {
         let proxy = proxy.clone();
         move |uri: String, default_path: &mut PathBuf| {
             let dialog_result = FileDialog::new()
-                .set_location(&download_dir().unwrap())
-                .set_filename(&default_path.display().to_string())
-                .show_save_single_file();
-            if let Ok(Some(path)) = dialog_result {
-                *default_path = path.clone();
-                let submitted = proxy
-                    .send_event(UserEvent::DownloadStarted(uri, path.display().to_string()))
-                    .is_ok();
-                submitted
-            } else {
-                false
-            }
+                .set_file_name(&default_path.display().to_string())
+                .save_file();
+
+            let path = dialog_result.unwrap().to_path_buf();
+            *default_path = path.clone();
+            let submitted = proxy
+                .send_event(UserEvent::DownloadStarted(uri, path.display().to_string()))
+                .is_ok();
+            submitted
         }
     };
 

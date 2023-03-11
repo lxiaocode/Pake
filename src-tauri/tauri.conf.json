@@ -17,6 +17,9 @@
     "security": {
       "csp": null
     },
+    "allowlist": {
+      "all": true
+    },
     "updater": {
       "active": false
     }
